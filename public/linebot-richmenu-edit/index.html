@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src * data: gap: https://ssl.gstatic.com 'unsafe-eval' 'unsafe-inline'; style-src * 'unsafe-inline'; media-src *; img-src * data: content: blob:;">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="msapplication-tap-highlight" content="no">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+  <!-- Optional theme -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="css/start.css">
+  <script src="js/methods_bootstrap.js"></script>
+  <script src="js/components_bootstrap.js"></script>
+  <script src="js/vue_utils.js"></script>
+
+  <script src="dist/js/vconsole.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+  <title>LINEBot： リッチメニューエディタ</title>
+</head>
+<body>
+    <div id="top" class="container-fluid">
+        <h1>LINEBot： リッチメニューエディタ</h1>
+        <hr>
+
+        <div class="form-inline">
+          <select class="form-control" v-model="menu_id">
+            <option value="">新規作成</option>
+            <option v-for="(menu, index) in menu_list" v-bind:value="menu.richMenuId">{{menu.name}} ({{menu.richMenuId}})</option>
+          </select>
+          <button class="btn btn-default" v-on:click="menu_select">選択</button>
+          <button class="btn btn-default" v-on:click="menu_delete" v-if="menu_id!=''">削除</button>
+          <button class="btn btn-default" v-on:click="menu_copy" v-if="menu_id!=''">複製</button>
+        </div>
+        <button class="btn btn-default btn-lg pull-right" v-on:click="body_upload" v-if="edit_mode">Bodyアップロード</button>
+        <button class="btn btn-default btn-lg pull-right" v-on:click="body_check">Body確認</button>
+        <input v-if="edit_mode" type="file" id="image_file" v-on:change="image_open" v-on:click="image_click">
+        <div class="form-inline">
+          <label>scale</label> <select class="form-control" v-model.number="image_scale" v-on:change="style_update">
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="200">200</option>
+          </select> %
+        </div>
+        <br>
+        <div style="position: relative;" v-show="image_src">
+          <img id="image_view" v-bind:src="image_src" v-bind:width="Math.floor(image_width * image_scale / 100)" v-bind:height="Math.floor(image_height * image_scale / 100)" >
+          <p v-for="(area, index) in area_list" v-if="range_list[index].view" class="range" v-bind:style="range_list[index]"></p>
+        </div>
+        <br>
+
+        <div class="form-inline" v-if="image_src">
+          <label>width</label> {{image_width}}<br>
+          <label>height</label> {{image_height}}<br>
+        </div>
+        <span v-if="!edit_mode"><label>richMenuId</label> {{body.richMenuId}}<br></span>
+        <input type="checkbox" v-model="body.selected" id="chk_body_selected" v-bind:disabled="!edit_mode"><label for="chk_body_selected">selected</label><br>
+        <div class="form-inline">
+          <label>name</label> <input type="text" class="form-control" v-model="body.name" v-bind:disabled="!edit_mode">
+        </div>
+        <label>chatBarText</label> <input type="text" class="form-control" v-model="body.chatBarText" v-bind:disabled="!edit_mode"><br>
+        <label>areas</label>
+        <table class="table table-striped">
+          <thead>
+            <tr><th></th><th>view</th></th><th>x</th><th>y</th><th>width</th><th>height</th><th>action-type</th><th>action</th></tr>
+          </thead>
+          <tbody>
+            <tr v-for="(area, index) in area_list">
+              <td><button v-if="edit_mode" class="btn btn-default btn-sm" v-on:click="call_area_delete(index)">削除</button></td><td><input type="checkbox" v-model="range_list[index].view"></td>
+              <td>{{area.bounds.x}}</td><td>{{area.bounds.y}}</td><td>{{area.bounds.width}}</td><td>{{area.bounds.height}}</td>
+              <td>{{area.action.type}}</td>
+              <td>
+                <button v-if="edit_mode" class="btn btn-default btn-sm" v-on:click="call_area_edit(index)">編集</button>
+                <button v-else class="btn btn-default btn-sm" v-on:click="call_area_view(index)">参照</button>
+              </td>
+            </tr>
+            <tr v-if="edit_mode"><td><button class="btn btn-default btn-sm" v-on:click="call_area_new">追加</button></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          </tbody>
+        </table>
+        <br>
+
+        <modal-dialog id="area_new">
+          <div slot="content">
+            <div class="modal-header">
+              <h4 class="modal-title">追加</h4>
+            </div>
+            <div class="modal-body">
+              <div class="form-inline">
+                <label>x</label> <input type="number" class="form-control" v-model.number="bounds_new.x"><br>
+                <label>y</label> <input type="number" class="form-control" v-model.number="bounds_new.y"><br>
+                <label>width</label> <input type="number" class="form-control" v-model.number="bounds_new.width"><br>
+                <label>height</label> <input type="number" class="form-control" v-model.number="bounds_new.height"><br>
+                <label>action</label>
+                <select class="form-control" v-model="action_new.type">
+                  <option value="postback">ポストバック</option>
+                  <option value="message">メッセージ</option>
+                  <option value="uri">URI</option>
+                  <option value="datetimepicker">日時選択</option>
+                </select>
+              </div>
+              <div v-if="action_new.type=='postback'">
+                <label>data</label> <input type="text" class="form-control" v-model="action_new.data"><br>
+              </div>
+              <div v-else-if="action_new.type=='message'">
+                <label>text</label> <input type="text" class="form-control" v-model="action_new.text"><br>
+              </div>
+              <div v-else-if="action_new.type=='uri'">
+                <label>uri</label> <input type="text" class="form-control" v-model="action_new.uri"><br>
+              </div>
+              <div v-else-if="action_new.type=='datetimepicker'">
+                <label>data</label> <input type="text" class="form-control"  v-model="action_new.data"><br>
+                <label>mode</label> <select class="form-control"  v-model="action_new.mode">
+                  <option value="date">date</option>
+                  <option value="time">time</option>
+                  <option value="datetime">datetime</option>
+                </select>
+              </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" v-on:click="do_area_new">追加</button>
+                <button class="btn btn-default" v-on:click="dialog_close('#area_new')">キャンセル</button>
+            </div>
+          </div>
+        </modal-dialog>
+
+        <modal-dialog id="area_edit">
+          <div slot="content">
+            <div class="modal-header">
+              <h4 class="modal-title">編集</h4>
+            </div>
+            <div class="modal-body">
+              <div class="form-inline">
+                <label>x</label> <input type="number" class="form-control" v-model.number="bounds_new.x"><br>
+                <label>y</label> <input type="number" class="form-control" v-model.number="bounds_new.y"><br>
+                <label>width</label> <input type="number" class="form-control" v-model.number="bounds_new.width"><br>
+                <label>height</label> <input type="number" class="form-control" v-model.number="bounds_new.height"><br>
+                <label>action</label>
+                <select class="form-control" v-model="action_new.type">
+                  <option value="postback">ポストバック</option>
+                  <option value="message">メッセージ</option>
+                  <option value="uri">URI</option>
+                  <option value="datetimepicker">日時選択</option>
+                </select>
+              </div>
+              <div v-if="action_new.type=='postback'">
+                <label>data</label> <input type="text" class="form-control" v-model="action_new.data"><br>
+              </div>
+              <div v-else-if="action_new.type=='message'">
+                <label>text</label> <input type="text" class="form-control" v-model="action_new.text"><br>
+              </div>
+              <div v-else-if="action_new.type=='uri'">
+                <label>uri</label> <input type="text" class="form-control" v-model="action_new.uri"><br>
+              </div>
+              <div v-else-if="action_new.type=='datetimepicker'">
+                <label>data</label> <input type="text" class="form-control"  v-model="action_new.data"><br>
+                <label>mode</label> <select class="form-control"  v-model="action_new.mode">
+                  <option value="date">date</option>
+                  <option value="time">time</option>
+                  <option value="datetime">datetime</option>
+                </select>
+              </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" v-on:click="do_area_edit">編集</button>
+                <button class="btn btn-default" v-on:click="dialog_close('#area_edit')">キャンセル</button>
+            </div>
+          </div>
+        </modal-dialog>
+
+        <modal-dialog id="area_view">
+          <div slot="content">
+            <div class="modal-header">
+              <h4 class="modal-title">参照</h4>
+            </div>
+            <div class="modal-body">
+              <div class="form-inline">
+                <label>x</label> {{bounds_new.x}}<br>
+                <label>y</label> {{bounds_new.y}}<br>
+                <label>width</label> {{bounds_new.width}}<br>
+                <label>height</label> {{bounds_new.height}}<br>
+                <label>action</label>
+                <select class="form-control" v-model="action_new.type" disabled>
+                  <option value="postback">ポストバック</option>
+                  <option value="message">メッセージ</option>
+                  <option value="uri">URI</option>
+                  <option value="datetimepicker">日時選択</option>
+                </select>
+              </div>
+              <div v-if="action_new.type=='postback'">
+                <label>data</label> {{action_new.data}}<br>
+              </div>
+              <div v-else-if="action_new.type=='message'">
+                <label>text</label> {{action_new.text}}<br>
+              </div>
+              <div v-else-if="action_new.type=='uri'">
+                <label>uri</label> {{action_new.uri}}<br>
+              </div>
+              <div v-else-if="action_new.type=='datetimepicker'">
+                <label>data</label> {{action_new.data}}<br>
+                <label>mode</label> <select class="form-control" v-model="action_new.mode" disabled>
+                  <option value="date">date</option>
+                  <option value="time">time</option>
+                  <option value="datetime">datetime</option>
+                </select>
+              </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" v-on:click="dialog_close('#area_view')">閉じる</button>
+            </div>
+          </div>
+        </modal-dialog>
+
+        <modal-dialog id="body_view" size="lg">
+          <div slot="content">
+            <div class="modal-header">
+              <h4 class="modal-title">Body</h4>
+            </div>
+            <div class="modal-body">
+              <textarea class="form-control" rows="20">{{body_json}}</textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" v-on:click="dialog_close('#body_view')">閉じる</button>
+            </div>
+          </div>
+        </modal-dialog>
+
+        <!-- for progress-dialog -->
+        <progress-dialog v-bind:title="progress_title"></progress-dialog>
+    </div>
+
+    <script src="js/start.js"></script>
+</body>
