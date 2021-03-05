@@ -96,15 +96,19 @@ var vue_options = {
             if( !confirm('本当にアップロードしますか？') )
                 return;
 
-            this.body_create();
-            var body = {
-                image: this.image_base64,
-                object: JSON.parse(this.body_json)
-            };
-            var json = await do_post(base_url + "/linebot-richmenu-upload", body );
-            alert('richMenuId: ' + json.richMenuId);
-            this.edit_reset();
-            this.menu_update();
+            try{
+                this.body_create();
+                var body = {
+                    image: this.image_base64,
+                    object: JSON.parse(this.body_json)
+                };
+                var json = await do_post(base_url + "/linebot-richmenu-upload", body );
+                alert('richMenuId: ' + json.richMenuId);
+                this.edit_reset();
+                this.menu_update();
+            }catch(error){
+                alert(error);
+            }
         },
         body_check: function(){
             this.body_create();
