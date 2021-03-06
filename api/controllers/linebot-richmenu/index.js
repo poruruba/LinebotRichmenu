@@ -67,5 +67,9 @@ exports.handler = async (event, context, callback) => {
     var body = JSON.parse(event.body);
     await app.client.setDefaultRichMenu(body.menu_id);
     return new Response({});
+  }else
+  if( event.path == '/linebot-richmenu-get-default' ){
+    var menu_id = await app.client.getDefaultRichMenuId();
+    return new Response({ menu_id: menu_id });
   }
 };
