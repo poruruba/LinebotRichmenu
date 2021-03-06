@@ -39,7 +39,9 @@
         <div class="form-inline">
           <select class="form-control" v-model="menu_id">
             <option value="">新規作成</option>
-            <option v-for="(menu, index) in menu_list" v-bind:value="menu.richMenuId">{{menu.name}} ({{menu.richMenuId}})</option>
+            <option v-for="(menu, index) in menu_list" v-bind:value="menu.richMenuId">
+              {{menu.richMenuId==default_menu_id ? '★' : '　'}} {{menu.name}} ({{menu.richMenuId}})
+            </option>
           </select>
           <button class="btn btn-default" v-on:click="menu_select">選択</button>
           <button class="btn btn-default" v-on:click="menu_delete" v-if="menu_id!=''">削除</button>
