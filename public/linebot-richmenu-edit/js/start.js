@@ -92,6 +92,11 @@ var vue_options = {
             var json = await do_post(base_url + "/linebot-richmenu-list", {} );
             this.menu_list = json.list;
         },
+        body_set_default: async function(){
+            var json = await do_post(base_url + "/linebot-richmenu-set-default", { menu_id: this.menu_id } );
+            console.log(json);
+            alert('デフォルトに設定しました。');
+        },
         body_upload: async function(){
             if( !confirm('本当にアップロードしますか？') )
                 return;
