@@ -25,6 +25,7 @@ var vue_options = {
         body: {},
         menu_id: "",
         edit_mode: true,
+        default_menu_id: null,
     },
     computed: {
     },
@@ -89,6 +90,8 @@ var vue_options = {
             }
         },
         menu_update: async function(){
+            var json = await do_post(base_url + "/linebot-richmenu-get-default" );
+            this.default_menu_id = json.menu_id;
             var json = await do_post(base_url + "/linebot-richmenu-list", {} );
             this.menu_list = json.list;
         },
@@ -96,6 +99,7 @@ var vue_options = {
             var json = await do_post(base_url + "/linebot-richmenu-set-default", { menu_id: this.menu_id } );
             console.log(json);
             alert('デフォルトに設定しました。');
+            this.menu_update();
         },
         body_upload: async function(){
             if( !confirm('本当にアップロードしますか？') )
