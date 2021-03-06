@@ -101,6 +101,17 @@ var vue_options = {
             alert('デフォルトに設定しました。');
             this.menu_update();
         },
+        body_save: function(){
+            var blob = new Blob([this.body_json], {type: "text/plain"});
+            var url = window.URL.createObjectURL(blob);
+
+            var a = document.createElement("a");
+            a.href = url;
+            a.target = '_blank';
+            a.download = "richmenu.json";
+            a.click();
+            window.URL.revokeObjectURL(url);
+        },
         body_upload: async function(){
             if( !confirm('本当にアップロードしますか？') )
                 return;
