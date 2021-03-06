@@ -1,8 +1,8 @@
 'use strict';
 
 const config = {
-  channelAccessToken: 'yƒ`ƒƒƒlƒ‹ƒAƒNƒZƒXƒg[ƒNƒ“i’·Šújz',
-  channelSecret: 'yƒ`ƒƒƒlƒ‹ƒV[ƒNƒŒƒbƒgz',
+  channelAccessToken: 'ã€ãƒãƒ£ãƒãƒ«ã‚¢ã‚¯ã‚»ã‚¹ãƒˆãƒ¼ã‚¯ãƒ³ï¼ˆé•·æœŸï¼‰ã€‘',
+  channelSecret: 'ã€ãƒãƒ£ãƒãƒ«ã‚·ãƒ¼ã‚¯ãƒ¬ãƒƒãƒˆã€‘',
 };
 
 const HELPER_BASE = process.env.HELPER_BASE || '../../helpers/';
@@ -61,6 +61,11 @@ exports.handler = async (event, context, callback) => {
   if( event.path == '/linebot-richmenu-delete' ){
     var body = JSON.parse(event.body);
     await app.client.deleteRichMenu(body.menu_id);
+    return new Response({});
+  }else
+  if( event.path == '/linebot-richmenu-set-default' ){
+    var body = JSON.parse(event.body);
+    await app.client.setDefaultRichMenu(body.menu_id);
     return new Response({});
   }
 };
