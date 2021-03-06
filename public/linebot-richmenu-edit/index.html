@@ -239,7 +239,8 @@
               <textarea class="form-control" rows="20">{{body_json}}</textarea>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-default" v-on:click="dialog_close('#body_view')">閉じる</button>
+              <button class="btn btn-default" v-on:click="body_save">ファイル保存</button>
+              <button class="btn btn-default" v-on:click="dialog_close('#body_view')">閉じる</button>
             </div>
           </div>
         </modal-dialog>
