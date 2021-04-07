@@ -92,8 +92,12 @@ var vue_options = {
         menu_update: async function(){
             var json = await do_post(base_url + "/linebot-richmenu-list", {} );
             this.menu_list = json.list;
-            var json = await do_post(base_url + "/linebot-richmenu-get-default" );
-            this.default_menu_id = json.menu_id;
+            try{
+                var json = await do_post(base_url + "/linebot-richmenu-get-default" );
+                this.default_menu_id = json.menu_id;
+            }catch(error){
+                this.default_menu_id = null;
+            }
         },
         body_set_default: async function(){
             var json = await do_post(base_url + "/linebot-richmenu-set-default", { menu_id: this.menu_id } );
