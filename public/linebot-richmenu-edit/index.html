@@ -70,8 +70,8 @@
         <br>
 
         <div class="form-inline" v-if="image_src">
-          <label>width</label> {{image_width}}<br>
-          <label>height</label> {{image_height}}<br>
+          <label>width</label> {{image_width}} (800以上 2500以下)<br>
+          <label>height</label> {{image_height}} (250以上)<br>
         </div>
         <span v-if="!edit_mode"><label>richMenuId</label> {{body.richMenuId}}<br></span>
         <input type="checkbox" v-model="body.selected" id="chk_body_selected" v-bind:disabled="!edit_mode"><label for="chk_body_selected">selected</label><br>
