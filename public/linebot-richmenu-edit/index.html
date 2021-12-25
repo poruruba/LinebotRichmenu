@@ -52,6 +52,7 @@
         <button class="btn btn-default btn-lg pull-right" v-on:click="body_set_default" v-if="!edit_mode">Defaultに設定</button>
         <br>
         <div v-if="edit_mode">
+          <label>richmenu_image(800px以上2500px以下 x 250px以上、アスペクト比1.45以上)</label> <input type="file" id="image_file" v-on:change="image_open" v-on:click="image_click">
           <label>richmenu_image<label> <input type="file" id="image_file" v-on:change="image_open" v-on:click="image_click">
         </div>
         <div class="form-inline">
@@ -72,14 +73,15 @@
         <div class="form-inline" v-if="image_src">
           <label>width</label> {{image_width}} (800以上 2500以下)<br>
           <label>height</label> {{image_height}} (250以上)<br>
+          <label>アスペクト比</label> {{(image_width / image_height).toFixed(2)}} (1.45以上)<br>
         </div>
         <span v-if="!edit_mode"><label>richMenuId</label> {{body.richMenuId}}<br></span>
         <input type="checkbox" v-model="body.selected" id="chk_body_selected" v-bind:disabled="!edit_mode"><label for="chk_body_selected">selected</label><br>
         <div class="form-inline">
-          <label>name</label> <input type="text" class="form-control" v-model="body.name" v-bind:disabled="!edit_mode">
+          <label>name(最大文字数：300)</label> <input type="text" class="form-control" v-model="body.name" v-bind:disabled="!edit_mode">
         </div>
-        <label>chatBarText</label> <input type="text" class="form-control" v-model="body.chatBarText" v-bind:disabled="!edit_mode"><br>
-        <label>areas</label>
+        <label>chatBarText(最大文字数：14)</label> <input type="text" class="form-control" v-model="body.chatBarText" v-bind:disabled="!edit_mode"><br>
+        <label>areas(最大領域オブジェクト数：20)</label>
         <table class="table table-striped">
           <thead>
             <tr><th></th><th>view</th></th><th>x</th><th>y</th><th>width</th><th>height</th><th>action-type</th><th>action</th></tr>
